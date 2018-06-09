@@ -9,3 +9,9 @@ window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileS
 window.webkitStorageInfo.requestQuota(window.PERSISTENT,1024*1024*5,function(gratedBytes) {
   window.requestFileSystem(window.PERSISTENT, gratedBytes, initFs, errorHandler);
 }, errorHandler);
+
+//出错回调
+function errorHandler(err) {
+  console.error(err);
+  //console.info(typeof FileError);//不可用或已经放弃
+}
