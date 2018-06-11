@@ -32,15 +32,17 @@ function successHandler(fs) {
 				function (fileEntry) {
           if (fileEntry.isFile) {
             fileEntry.createWriter(function (fileWriter) {
-
-							fileWriter.onwriteend=function(e){}
-							
+							// onwritestart: 写入文件开始时的回调函数
+							// onprogress: 写入文件过程中的回调函数
+							// onwrite: 写入文件成功完成的回调函数
+							// onabort: 取消写入文件时的回调函数
+							// onwriteend: 文件写入操作完成时的回调函数
               fileWriter.onerror = function(e){
 
 								//指定位置，将写入指针移动到文件结尾
 								fileWriter.seek(fileWriter.length);
 								
-                var blob = new Blob(['写入异常：'+e.toString()], {
+                let blob = new Blob(['异常：'+e.toString()], {
                   type: 'text/plain'
                 });
                 fileWriter.write (blob);
