@@ -55,9 +55,9 @@ function successHandler(fs) {
 						//获取文件关联的写文件操作对象FileWriter
             fileEntry.createWriter(function (fileWriter) {
 							// 1.readyState:当前文件读取写入状态，常量值如下：
-							// INIT: 0，
-							// WRITING: 1，
-							// DONE: 2，
+								// INIT: 0，
+								// WRITING: 1，
+								// DONE: 2，
 							// 2.position：当前操作指针位置
 							// 3.length：当前写入文件的长度，字节数
 							// 4.error：异常
