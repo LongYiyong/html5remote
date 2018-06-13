@@ -17,27 +17,41 @@ function errorHandler(err) {
 
 function successHandler(fs) {
 	//参数DOMFileSystem文件系统对象表示一个应用可访问的根目录，用于管理特定本地文件目录。name属性用于标识当前沙盒系统根目录名称，协议、域名、端口+操作类型，与LocalFileSystem中的文件系统类型一一对应。root属性为文件目录对象，用于实际操作文件系统，DirectoryEntry
+	
   //创建目录下的文件只能创建当前目录下的文件(不能直接指定路径创建文件)
   fs.root.getDirectory('Dir', { 
     create: true, //创建新文件，如果文件存在抛出异常执行errorHandle，不影响程序执行
     exclusive: true //高级文件验证
   }, function (dirEntry) {
+		// DirectoryEntry对象属性
+		// 1.name:文件名称，包括扩展名
+		// 2.fullPath:相对沙盒根目录的全名称
+		// 3.isFile：是否是文件,FileEntry对象固定为true
+		// 4.isDirectory：是否是文件夹，FileEntry对象固定为false
+		// 5.filesystem:当前fs（FileSystem对象）的引用
+
 		//选择多个文件，并复制到沙盒文件系统中
 		let files = document.querySelector('input').file;
     for (let i = 0; i < files.length; i++) {
-      let file = files[i];
+			let file = files[i];
+			// File对象是文件系统中的文件数据对象，用于获取文件的数据，包含四个属性
+			// size: 文件数据对象的数据大小，单位为字节
+			// type: 文件数据对象MIME类型
+			// name: 文件数据对象的名称，不包括路径
+			// lastModifiedDate: 文件对象的最后修改时间
+			// file.slice(start, end)获取文件指定的数据内容
+			// file.close()当文件数据对象不再使用时，可通过此方法关闭文件数据对象，释放系统资源
+
       (function (f) {
+				// DirectoryEntry方法1 创建或打开文件
         dirEntry.getFile(file.name,{
 					create:true//不指定exclusive，create=true的话,不存在创建，存在覆盖
 				},
 				function (fileEntry) {
-					// 1.name:文件名称，包括扩展名
-					// 2.fullPath:相对沙盒根目录的全名称
-					// 3.isFile：是否是文件,FileEntry对象固定为true
-					// 4.isDirectory：是否是文件夹，FileEntry对象固定为false
-					// 5.filesystem:当前fs（FileSystem对象）的引用
+					// FileEntry对象属性同DirectoryEntry
 
-					// fileEntry.getMetadata(successCallback, opt_errorCallback); 获取文件或目录状态信息成功的回调函数返回Metadata对象，modificationTime: (Date 类型 )文件或目录的最后修改时间。size文件的大小，若获取的是目录对象的属性则值为0。
+					
+					// fileEntry.getMetadata(successCallback, opt_errorCallback); 获取文件或目录状态信息成功的回调函数返回Metadata对象，modificationTime: (Date 类型 )文件或目录的最后修改时间。size文件的大小，若获取的是目录对象的属性则值为0。directoryCount: (Number 类型 )包含的子目录数，若自身是文件则其值为0。fileCount: (Number 类型 )目录的文件数，若自身是文件则其值为0。测试时不可用
 
 					// fileEntry.remove(successCallback, opt_errorCallback);
 
@@ -74,9 +88,14 @@ function successHandler(fs) {
                 let blob = new Blob(['异常：'+e.toString()], {
                   type: 'text/plain'
 								});
+
 								//File对象，Blob对象，DOMString类型
 								fileWriter.write (blob);
+
+								fileWriter.truncate(0)//按照指定长度截断文件
+
 								fileWriter.abort()
+
 							}
 							
 							fileWriter.write (f);//参数File或Blob
@@ -94,12 +113,14 @@ function successHandler(fs) {
 function showFile(fileEntity) {
 
   fileEntity.file(function (file) {
-    var reader = new FileReader();
+
+		var reader = new FileReader();
+		
     reader.onloadend = function (e) {
       console.log(reader.result);
-    }
-    reader.readAsText(file);
-    console.log(fileEntry.fullPath+'文件名：' + fileEntry.name +'\r\n字节大小：' + file.size)
+		}
+		
+		reader.readAsText(file);
+		
 	});
-	
 }
