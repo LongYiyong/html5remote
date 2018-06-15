@@ -152,6 +152,18 @@ function successHandler(fs) {
     dirEntry.removeRecursively(function () {
       console.log('删除目录成功：' + dirEntry.name);
     }, errorHandler);
+	}, errorHandler)
+	
+	fs.root.getDirectory('txt_1', { create: false }, function (dirEntry) {
+    //4复制移动操作，如果没有提供新名字，系统默认使用原名,如果目录已经存在复制失败
+    dirEntry.copyTo(fs.root, 'txt_2', function (dirEntiry2) {
+      //5移动目录
+      dirEntry.moveTo(dirEntry2, 'txt_1_move', function (dirEntry) {
+        console.log('移动目录成功：' + dirEntry.fullPath);
+        //6重命名,如果移动的目录相同，名字不同，当做重命名处理
+        fileEntry.moveTo(fs.root, 'txt_2_rename');
+      }, errorHandler);
+    }, errorHandler);
   }, errorHandler)
 }
 
