@@ -171,7 +171,6 @@ function successHandler(fs) {
 function showFile(fileEntity) {
 
   fileEntity.file(function (file) {
-0000
 		
     reader.onloadend = function (e) {
       console.log(reader.result);
