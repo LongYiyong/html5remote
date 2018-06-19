@@ -72,14 +72,13 @@ function successHandler(fs) {
 		// file.slice(start, end)获取文件指定的数据内容
 		// file.close()当文件数据对象不再使用时，可通过此方法关闭文件数据对象，释放系统资源
 		(function (f) {
-			// DirectoryEntry方法1 创建或打开文件
+			// DirectoryEntry.getFile( path, flag, succesCB, errorCB )创建或打开文件
 			dirEntry.getFile(file.name,{
 				create:true//不指定exclusive，create=true的话,不存在创建，存在覆盖
 			},
 			function (fileEntry) {
 				// FileEntry对象属性同DirectoryEntry
 
-				
 				// fileEntry.getMetadata(successCallback, opt_errorCallback); 获取文件或目录状态信息成功的回调函数返回Metadata对象，modificationTime: (Date 类型 )文件或目录的最后修改时间。size文件的大小，若获取的是目录对象的属性则值为0。directoryCount: (Number 类型 )包含的子目录数，若自身是文件则其值为0。fileCount: (Number 类型 )目录的文件数，若自身是文件则其值为0。测试时不可用
 
 				// fileEntry.remove(successCallback, opt_errorCallback);
@@ -124,7 +123,6 @@ function successHandler(fs) {
 							fileWriter.truncate(0)//按照指定长度截断文件
 
 							fileWriter.abort()
-
 						}
 						
 						fileWriter.write (f);//参数File或Blob
@@ -135,8 +133,11 @@ function successHandler(fs) {
 			}, errorHandler)
 		})(file);
 	}
-
-	//3删除目录，子目录创建需要递归，获取可以直接指定'/'
+ 
+	
+	// DirectoryEntry.remove( succesCB, errorCB );
+	// 说明：以下情况删除目录将会导致失败： 目录中存在文件； 删除根目录；
+	//删除目录，子目录创建需要递归，获取可以直接指定'/'
   //如果子目录不存在，抛出删除异常
   fs.root.getDirectory('musi/genres/jazz', {}, function (dirEntry) {
     dirEntry.remove(function () {
@@ -146,8 +147,9 @@ function successHandler(fs) {
 	
 
 
-
-  //3递归方式删除目录及子目录，如目录中有文件也直接删除
+	// DirectoryEntry.removeRecursively( succesCB, errorCB )
+	// 递归方式删除目录及子目录，如目录中有文件也直接删除
+	// 不能删除根目录，如果操作删除根目录将会删除目录下的文件及子目录，不会删除根目录自身
   fs.root.getDirectory('mymove/', {}, function (dirEntry) {
     dirEntry.removeRecursively(function () {
       console.log('删除目录成功：' + dirEntry.name);
@@ -155,9 +157,13 @@ function successHandler(fs) {
 	}, errorHandler)
 	
 	fs.root.getDirectory('txt_1', { create: false }, function (dirEntry) {
-    //4复制移动操作，如果没有提供新名字，系统默认使用原名,如果目录已经存在复制失败
+		// DirectoryEntry.copyTo( parent, newName, succesCB, errorCB )
+		// 复制移动操作，如果没有提供新名字，系统默认使用原名
+		// 以下情况拷贝目录将会导致失败： 将父目录拷贝到子目录中； 要拷贝到的目标目录无效； 要拷贝到的目标路径被文件占用； 要拷贝到的目标目录已经存在并且不为空。 
     dirEntry.copyTo(fs.root, 'txt_2', function (dirEntiry2) {
-      //5移动目录
+
+			// DirectoryEntry.moveTo( parent, newName, succesCB, errorCB )
+      //移动目录
       dirEntry.moveTo(dirEntry2, 'txt_1_move', function (dirEntry) {
         console.log('移动目录成功：' + dirEntry.fullPath);
         //6重命名,如果移动的目录相同，名字不同，当做重命名处理
@@ -177,6 +183,5 @@ function showFile(fileEntity) {
 		}
 		
 		reader.readAsText(file);
-		
 	});
 }
