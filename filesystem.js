@@ -49,36 +49,82 @@ function successHandler(fs) {
   fs.root.getDirectory('Dir', { 
     create: true, //如果文件或目录不存在时是否进行创建，默认false
     exclusive: true //反向操作标记，本身没任何效果，需与create属性值设置为true时一起使用，如果目标文件或目录已经存在则抛出异常，不影响程序执行，默认值为false
-  }, function (DdirectoryEntry) {
-		// DirectoryEntry对象属性
-		// 1.name:文件名称，包括扩展名
-		// 2.fullPath:相对沙盒根目录的全名称
-		// 3.isFile：是否是文件,FileEntry对象固定为true
-		// 4.isDirectory：是否是文件夹，FileEntry对象固定为false
-		// 5.filesystem:当前fs（FileSystem对象）的引用
+  }, function (DirectoryEntry) {
 
-		// DirectoryEntry.remove( succesCB, errorCB );
-		// 说明：以下情况删除目录将会导致失败： 目录中存在文件； 删除根目录；
-		// 删除目录，子目录创建需要递归，获取可以直接指定'/'
-		// 如果子目录不存在，抛出删除异常
-		fs.root.getDirectory('subDir1/musi/genres/jazz', {}, function (dirEntry) {
-			dirEntry.remove(function () {
-				console.log('删除目录成功');
-			}, errorHandler);
-		},errorHandler)
-
-
-		// DirectoryEntry.removeRecursively( succesCB, errorCB )
+		// 3.DirectoryEntry.removeRecursively( succesCB, errorCB )
 		// 递归方式删除目录及子目录，如目录中有文件也直接删除
 		// 不能删除根目录，如果操作删除根目录将会删除目录下的文件及子目录，不会删除根目录自身
 		dirEntry.removeRecursively(function () {
 			console.log('删除目录成功：' + dirEntry.name);
 		}, errorHandler);
-
 	}, errorHandler);
 
+	// 4.DirectoryEntry.remove( succesCB, errorCB );
+	// 说明：以下情况删除目录将会导致失败： 目录中存在文件； 删除根目录；
+	// 删除目录，子目录创建需要递归，获取可以直接指定'/'
+	// 如果子目录不存在，抛出删除异常
+	fs.root.getDirectory('subDir1/musi/genres/jazz', {}, function (dirEntry) {
+		dirEntry.remove(function () {
+			console.log('删除目录成功');
+		}, errorHandler);
+	},errorHandler)
+
+	
+	fs.root.getDirectory('txt_1', { create: false }, function (dirEntry) {
+		// DirectoryEntry.copyTo( parent, newName, succesCB, errorCB )
+		// 复制移动操作，如果没有提供新名字，系统默认使用原名
+		// 以下情况拷贝目录将会导致失败：将父目录拷贝到子目录中；要拷贝到的目标目录无效；要拷贝到的目标路径被文件占用；要拷贝到的目标目录已经存在且不为空
+    dirEntry.copyTo(fs.root, 'txt_2', function (dirEntiry2) {
+
+			// DirectoryEntry.moveTo( parent, newName, succesCB, errorCB )
+      //移动目录
+      dirEntry.moveTo(dirEntry2, 'txt_1_move', function (dirEntry) {
+        console.log('移动目录成功：' + dirEntry.fullPath);
+        //6重命名,如果移动的目录相同，名字不同，当做重命名处理
+        fileEntry.moveTo(fs.root, 'txt_2_rename');
+      }, errorHandler);
+    }, errorHandler);
+	}, errorHandler)
+}
 
 
+function showEntries(entries) {
+
+	var fragment = document.createDocumentFragment(),
+			liNode = document.createElement('li');
+	
+  entries.forEach(function (entry, i) {
+
+		var li = liNode.cloneNode();
+		// DirectoryEntry对象属性
+    li.innerHTML = [
+			'1文件名：', entry.name,
+			'2相对沙盒根目录的全名称', entry.fullPath,
+			'3是否是文件：', entry.isFile,
+			'4是否是目录：', entry.isDirectory, 
+			// 5.filesystem:当前fs（FileSystem对象）的引用
+			entry.name.includes('.png')?
+			'<img src="'+entry.toURL()+'"/>':
+			''
+		].join('');
+		//entry.toURL()结果：filesystem:http://localhost:57128/temporary/7.png
+    fragment.appendChild(li);
+	});
+	
+  document.querySelector('#filelist').appendChild(fragment);
+}
+
+
+
+
+
+
+
+
+
+
+
+fileDemo(){
 	//选择多个文件，并复制到沙盒文件系统中
 	let files = document.querySelector('input').file;
 	for (let i = 0; i < files.length; i++) {
@@ -90,8 +136,8 @@ function successHandler(fs) {
 		// lastModifiedDate: 文件对象的最后修改时间
 		// file.slice(start, end)获取文件指定的数据内容
 		// file.close()当文件数据对象不再使用时，可通过此方法关闭文件数据对象，释放系统资源
-		(function (f) {
-			// DirectoryEntry.getFile( path, flag, succesCB, errorCB )创建或打开文件
+		(function (file) {
+			// FileEntry.getFile( path, flag, succesCB, errorCB )创建或打开文件
 			dirEntry.getFile(file.name,{
 				create:true//不指定exclusive，create=true的话,不存在创建，存在覆盖
 			},
@@ -154,48 +200,7 @@ function successHandler(fs) {
 	}
 
 	
-	fs.root.getDirectory('txt_1', { create: false }, function (dirEntry) {
-		// DirectoryEntry.copyTo( parent, newName, succesCB, errorCB )
-		// 复制移动操作，如果没有提供新名字，系统默认使用原名
-		// 以下情况拷贝目录将会导致失败：将父目录拷贝到子目录中；要拷贝到的目标目录无效；要拷贝到的目标路径被文件占用；要拷贝到的目标目录已经存在且不为空
-    dirEntry.copyTo(fs.root, 'txt_2', function (dirEntiry2) {
-
-			// DirectoryEntry.moveTo( parent, newName, succesCB, errorCB )
-      //移动目录
-      dirEntry.moveTo(dirEntry2, 'txt_1_move', function (dirEntry) {
-        console.log('移动目录成功：' + dirEntry.fullPath);
-        //6重命名,如果移动的目录相同，名字不同，当做重命名处理
-        fileEntry.moveTo(fs.root, 'txt_2_rename');
-      }, errorHandler);
-    }, errorHandler);
-	}, errorHandler)
 }
-
-
-function showEntries(entries) {
-
-	var fragment = document.createDocumentFragment();
-	
-  entries.forEach(function (entry, i) {
-
-    var li = document.createElement('li');
-    li.innerHTML = ['是否是目录：', entry.isDirectory, '----文件名：', entry.name,entry.name.indexOf('.png') != -1?'<img src="' + entry.toURL() + '" width="100" border=1 />':''].join('');//entry.toURL()结果：filesystem:http://localhost:57128/temporary/7.png
-    fragment.appendChild(li);
-	});
-	
-  document.querySelector('#filelist').appendChild(fragment);
-}
-
-
-
-
-
-
-
-
-
-
-
 
 
 
