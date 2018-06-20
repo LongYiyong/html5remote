@@ -22,11 +22,11 @@ function successHandler(fs) {
 
 	// 1.DirectoryEntry.createReader
 	// 创建目录读取对象DirectoryReader,读取目下的文件及子目录
-	var dirReader = fs.root.createReader();
+	var directoryReader = fs.root.createReader();
 	var entries = [];
 	var readEntries = function () {
 		//一次读取内容的个数不一定
-		dirReader.readEntries(function (results) {
+		directoryReader.readEntries(function (results) {
 			//返回FileEntry数组
 			console.info(results);
 			if (!results.length) {
@@ -56,6 +56,25 @@ function successHandler(fs) {
 		// 3.isFile：是否是文件,FileEntry对象固定为true
 		// 4.isDirectory：是否是文件夹，FileEntry对象固定为false
 		// 5.filesystem:当前fs（FileSystem对象）的引用
+
+		// DirectoryEntry.remove( succesCB, errorCB );
+		// 说明：以下情况删除目录将会导致失败： 目录中存在文件； 删除根目录；
+		// 删除目录，子目录创建需要递归，获取可以直接指定'/'
+		// 如果子目录不存在，抛出删除异常
+		fs.root.getDirectory('subDir1/musi/genres/jazz', {}, function (dirEntry) {
+			dirEntry.remove(function () {
+				console.log('删除目录成功');
+			}, errorHandler);
+		},errorHandler)
+
+
+		// DirectoryEntry.removeRecursively( succesCB, errorCB )
+		// 递归方式删除目录及子目录，如目录中有文件也直接删除
+		// 不能删除根目录，如果操作删除根目录将会删除目录下的文件及子目录，不会删除根目录自身
+		dirEntry.removeRecursively(function () {
+			console.log('删除目录成功：' + dirEntry.name);
+		}, errorHandler);
+
 	}, errorHandler);
 
 
@@ -133,33 +152,12 @@ function successHandler(fs) {
 			}, errorHandler)
 		})(file);
 	}
- 
-	
-	// DirectoryEntry.remove( succesCB, errorCB );
-	// 说明：以下情况删除目录将会导致失败： 目录中存在文件； 删除根目录；
-	//删除目录，子目录创建需要递归，获取可以直接指定'/'
-  //如果子目录不存在，抛出删除异常
-  fs.root.getDirectory('musi/genres/jazz', {}, function (dirEntry) {
-    dirEntry.remove(function () {
-      console.log('删除目录成功');
-    }, errorHandler);
-	},errorHandler)
-	
 
-
-	// DirectoryEntry.removeRecursively( succesCB, errorCB )
-	// 递归方式删除目录及子目录，如目录中有文件也直接删除
-	// 不能删除根目录，如果操作删除根目录将会删除目录下的文件及子目录，不会删除根目录自身
-  fs.root.getDirectory('mymove/', {}, function (dirEntry) {
-    dirEntry.removeRecursively(function () {
-      console.log('删除目录成功：' + dirEntry.name);
-    }, errorHandler);
-	}, errorHandler)
 	
 	fs.root.getDirectory('txt_1', { create: false }, function (dirEntry) {
 		// DirectoryEntry.copyTo( parent, newName, succesCB, errorCB )
 		// 复制移动操作，如果没有提供新名字，系统默认使用原名
-		// 以下情况拷贝目录将会导致失败： 将父目录拷贝到子目录中； 要拷贝到的目标目录无效； 要拷贝到的目标路径被文件占用； 要拷贝到的目标目录已经存在并且不为空。 
+		// 以下情况拷贝目录将会导致失败：将父目录拷贝到子目录中；要拷贝到的目标目录无效；要拷贝到的目标路径被文件占用；要拷贝到的目标目录已经存在且不为空
     dirEntry.copyTo(fs.root, 'txt_2', function (dirEntiry2) {
 
 			// DirectoryEntry.moveTo( parent, newName, succesCB, errorCB )
@@ -170,18 +168,47 @@ function successHandler(fs) {
         fileEntry.moveTo(fs.root, 'txt_2_rename');
       }, errorHandler);
     }, errorHandler);
-  }, errorHandler)
+	}, errorHandler)
 }
+
+
+function showEntries(entries) {
+
+	var fragment = document.createDocumentFragment();
+	
+  entries.forEach(function (entry, i) {
+
+    var li = document.createElement('li');
+    li.innerHTML = ['是否是目录：', entry.isDirectory, '----文件名：', entry.name,entry.name.indexOf('.png') != -1?'<img src="' + entry.toURL() + '" width="100" border=1 />':''].join('');//entry.toURL()结果：filesystem:http://localhost:57128/temporary/7.png
+    fragment.appendChild(li);
+	});
+	
+  document.querySelector('#filelist').appendChild(fragment);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //显示指定fileEntity中的内容
-function showFile(fileEntity) {
+// function showFile(fileEntity) {
 
-  fileEntity.file(function (file) {
-		
-    reader.onloadend = function (e) {
-      console.log(reader.result);
-		}
-		
-		reader.readAsText(file);
-	});
-}
+//   fileEntity.file(function (file) {
+	// var reader = new FileReader();
+//     reader.onloadend = function (e) {
+//       console.log(reader.result);
+// 		}
+// console.log(fileEntry.fullPath+'文件名：' + fileEntry.name +'\r\n字节大小：' + file.size)
+// 		reader.readAsText(file);
+// 	});
+// }
