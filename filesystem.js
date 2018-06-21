@@ -124,7 +124,7 @@ function showEntries(entries) {
 
 
 
-fileDemo(){
+function fileDemo(){
 	//选择多个文件，并复制到沙盒文件系统中
 	let files = document.querySelector('input').file;
 	for (let i = 0; i < files.length; i++) {
@@ -199,7 +199,7 @@ fileDemo(){
 		})(file);
 	}
 
-	
+
 }
 
 
