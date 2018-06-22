@@ -1,21 +1,26 @@
-//FileSystemAPI 目录文件系统访问
-//网络应用可以创建、读取、导航用户本地文件系统中的沙盒部分以及向其中写入数据
-//API:DirectoryReader,FileEntry/DirectoryEntry,FileSystem,LocalFileSystem
+// FileSystemAPI 目录文件系统访问
+// 网络应用可以创建、读取、导航用户本地文件系统中的沙盒部分以及向其中写入数据
+// API:DirectoryReader,FileEntry/DirectoryEntry,FileSystem,LocalFileSystem
 
 
-//持久存储要用StorageInfo.requestQuota，成功回调参数为请求成功的空间
+// Chrome使用基于webkitStorageInfo新API请求存储
+// 如果使用持久存储，需要使用requestQuota
+// 用户授予许可后，就不必再调用requestQuota了
+// 如果修改了请求配额大小，会再次弹出提示框，提示用户授权。
+// 参数为请求成功的空间,后续调用为无操作指令
+// 查询源的当前配额使用情况和分配情况：window.webkitStorageInfo.queryUsageAndQuota()
 window.webkitStorageInfo.requestQuota(window.PERSISTENT,1024*1024*5,function(gratedBytes) {
 
-	//网络应用可通过调用requestFileSystem请求对沙盒文件系统的访问权限
-	//这是沙箱文件系统，一个网络应用无法访问另一个应用的文件
-	//首次调用系统会为您的应用创建新的存储空间，如不修改大小，只需要请求一次
+	// 网络应用可通过调用requestFileSystem请求对沙盒文件系统的访问权限
+	// 这是沙箱文件系统，一个网络应用无法访问另一个应用的文件
+	// 首次调用系统会为您的应用创建新的存储空间，如不修改大小只需请求一次
 	window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
   window.requestFileSystem(
 
 		//请求系统配额类型
 		//TEMPORARY存储的数据由浏览器自行决定删除
 		//清除PERSISTENT存储，须获得用户或应用明确授权，并需用户向您的应用授予配额
-		window.PERSISTENT, //0  临时
+		window.PERSISTENT, //1 永久
 
 		gratedBytes, //引用需要用于存储的大小（单位：字节）
 		DirectoryHandler, 
@@ -48,7 +53,7 @@ function DirectoryHandler(fs) {
 	}
 	readEntries();
 
-	// 2. DirectoryEntry.getDirectory( path, flag, succesCB, errorCB ); 
+	// 2. DirectoryEntry.getDirectory(path, flag, succesCB, errorCB)
 	// 创建或打开子目录，只能创建当前目录下的文件，不能直接指定路径创建文件
 	// path: ( DOMString ) 必选 要操作目录相对于当前目录的地址
 	// flag: ( Flags ) 要操作文件或目录的参数
@@ -66,6 +71,7 @@ function DirectoryHandler(fs) {
 		dirEntry.removeRecursively(function () {
 			console.log('删除目录成功：' + dirEntry.name);
 		}, errorHandler);
+
 	}, errorHandler);
 
 	//创建子目录，在使用getDirectory()创建父目录不存在的目录，将引发异常,为了使用方便以递归的方式，添加各个子目录
@@ -220,8 +226,6 @@ function fileDemo(){
 		})(file);
 	}
 
-
-
 	//移动文件,如果文件不存在移动失败
 	fs.root.getFile('test.txt', { 
 		create: false //如不指定create=true，文件不存在抛异常
@@ -254,14 +258,14 @@ function errorHandler(err) {
 
 
 //显示指定fileEntity中的内容
-// function showFile(fileEntity) {
+function showFile(fileEntity) {
 
-//   fileEntity.file(function (file) {
-	// var reader = new FileReader();
-//     reader.onloadend = function (e) {
-//       console.log(reader.result);
-// 		}
-// console.log(fileEntry.fullPath+'文件名：' + fileEntry.name +'\r\n字节大小：' + file.size)
-// 		reader.readAsText(file);
-// 	});
-// }
+  fileEntity.file(function (file) {
+	var reader = new FileReader();
+    reader.onloadend = function (e) {
+      console.log(reader.result);
+		}
+console.log(fileEntry.fullPath+'文件名：' + fileEntry.name +'\r\n字节大小：' + file.size)
+		reader.readAsText(file);
+	});
+}
