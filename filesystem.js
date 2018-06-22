@@ -1,24 +1,34 @@
-//请求系统配额类型
-window.TEMPORARY//0  临时
-window.PERSISTENT//1  持久
+//FileSystemAPI 目录文件系统访问
+//网络应用可以创建、读取、导航用户本地文件系统中的沙盒部分以及向其中写入数据
+//API:DirectoryReader,FileEntry/DirectoryEntry,FileSystem,LocalFileSystem
 
-//当前请求存储空间，如不修改大小，只需要请求一次
-window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
 
 //持久存储要用StorageInfo.requestQuota，成功回调参数为请求成功的空间
 window.webkitStorageInfo.requestQuota(window.PERSISTENT,1024*1024*5,function(gratedBytes) {
-  window.requestFileSystem(window.PERSISTENT, gratedBytes, successHandler, errorHandler);
+
+	//网络应用可通过调用requestFileSystem请求对沙盒文件系统的访问权限
+	//这是沙箱文件系统，一个网络应用无法访问另一个应用的文件
+	//首次调用系统会为您的应用创建新的存储空间，如不修改大小，只需要请求一次
+	window.requestFileSystem = window.requestFileSystem || window.webkitRequestFileSystem;
+  window.requestFileSystem(
+
+		//请求系统配额类型
+		//TEMPORARY存储的数据由浏览器自行决定删除
+		//清除PERSISTENT存储，须获得用户或应用明确授权，并需用户向您的应用授予配额
+		window.PERSISTENT, //0  临时
+
+		gratedBytes, //引用需要用于存储的大小（单位：字节）
+		DirectoryHandler, 
+		errorHandler);
 }, errorHandler);
 
-//出错回调
-function errorHandler(err) {
+function errorHandler(err) {//只有返回异常的文本内容
   //console.info(typeof FileError);//不可用或已经放弃
 }
 
-function successHandler(fs) {
+function DirectoryHandler(fs) {
 	//参数DOMFileSystem文件系统对象表示一个应用可访问的根目录，用于管理特定本地文件目录。name属性用于标识当前沙盒系统根目录名称，协议、域名、端口+操作类型，与LocalFileSystem中的文件系统类型一一对应。root属性为文件目录对象，用于实际操作文件系统，DirectoryEntry
 	
-
 
 	// 1.DirectoryEntry.createReader
 	// 创建目录读取对象DirectoryReader,读取目下的文件及子目录
@@ -27,8 +37,7 @@ function successHandler(fs) {
 	var readEntries = function () {
 		//一次读取内容的个数不一定
 		directoryReader.readEntries(function (results) {
-			//返回FileEntry数组
-			console.info(results);
+			//回调函数中返回FileEntry或者DirectoryEntry的数组
 			if (!results.length) {
 				showEntries(entries.sort());
 			} else {
@@ -46,7 +55,7 @@ function successHandler(fs) {
 	// succesCB: ( EntrySuccessCallback ) 创建或打开目录成功的回调函数
 	// errorCB: ( FileErrorCallback) 创建或打开目录失败的回调函数
   //创建目录下的文件只能创建当前目录下的文件(不能直接指定路径创建文件)
-  fs.root.getDirectory('Dir', { 
+  fs.root.getDirectory('Dir', { //JSON对象，获取文件操作的参数
     create: true, //如果文件或目录不存在时是否进行创建，默认false
     exclusive: true //反向操作标记，本身没任何效果，需与create属性值设置为true时一起使用，如果目标文件或目录已经存在则抛出异常，不影响程序执行，默认值为false
   }, function (DirectoryEntry) {
@@ -59,17 +68,29 @@ function successHandler(fs) {
 		}, errorHandler);
 	}, errorHandler);
 
+	//创建子目录，在使用getDirectory()创建父目录不存在的目录，将引发异常,为了使用方便以递归的方式，添加各个子目录
+	var path = 'musi/genres/jazz/';
+	function createDir(rootDirEntry, folders) {
+		if (folders[0] == '.' || folders[0] == '') {
+			folders.shift();
+		}
+		rootDirEntry.getDirectory(folders.shift(), { create: true }, function (dirEntry) {
+			folders.length && createDir(dirEntry, folders);
+			}
+		}, errorHandler)
+	}
+	createDir(fs.root, path.split('/'));
+
 	// 4.DirectoryEntry.remove( succesCB, errorCB );
 	// 说明：以下情况删除目录将会导致失败： 目录中存在文件； 删除根目录；
 	// 删除目录，子目录创建需要递归，获取可以直接指定'/'
 	// 如果子目录不存在，抛出删除异常
-	fs.root.getDirectory('subDir1/musi/genres/jazz', {}, function (dirEntry) {
+	fs.root.getDirectory(path, {}, function (dirEntry) {
 		dirEntry.remove(function () {
 			console.log('删除目录成功');
 		}, errorHandler);
 	},errorHandler)
 
-	
 	fs.root.getDirectory('txt_1', { create: false }, function (dirEntry) {
 		// DirectoryEntry.copyTo( parent, newName, succesCB, errorCB )
 		// 复制移动操作，如果没有提供新名字，系统默认使用原名
@@ -200,8 +221,35 @@ function fileDemo(){
 	}
 
 
+
+	//移动文件,如果文件不存在移动失败
+	fs.root.getFile('test.txt', { 
+		create: false //如不指定create=true，文件不存在抛异常
+	}, function (fileEntry) {
+		//获取移动目录
+		fs.root.getDirectory('mymove', { create: true }, function (dirEntry) {
+
+			//移动文件
+			fileEntry.moveTo(dirEntry, 'test_move.txt', function (fileEntry) {
+				console.log('移动文件成功');
+			}, errorHandler);
+
+			//复制文件,如文件存在则覆盖
+			fileEntry.copyTo(dirEntry, 'text_copy.txt', function (fileEntry) {
+				console.info('复制文件成功,如文件存在则覆盖');
+			}, errorHandler);
+
+			fileEntry.remove(function (dirEntry) {
+				console.log('删除文件成功');
+			}, errorHandler);
+		}, errorHandler);
+	}, errorHandler);
 }
 
+function errorHandler(err) {
+  console.error(err);
+  //console.info(typeof FileError);//不可用或已经放弃
+}
 
 
 
