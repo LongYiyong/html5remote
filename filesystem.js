@@ -151,6 +151,20 @@ function showEntries(entries) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function fileDemo(){
 	//选择多个文件，并复制到沙盒文件系统中
 	let files = document.querySelector('input').file;
@@ -265,7 +279,17 @@ function showFile(fileEntity) {
     reader.onloadend = function (e) {
       console.log(reader.result);
 		}
-console.log(fileEntry.fullPath+'文件名：' + fileEntry.name +'\r\n字节大小：' + file.size)
+		console.log(fileEntry.fullPath+'文件名：' + fileEntry.name +'\r\n字节大小：' + file.size)
 		reader.readAsText(file);
 	});
 }
+
+
+//具备filesystem: 网址，可用resolveLocalFileSystemURL找回fileEntry
+window.resolveLocalFileSystemURL = window.resolveLocalFileSystemURL ||window.webkitResolveLocalFileSystemURL;
+var url = 'filesystem:http://localhost:57128/temporary/t.txt';
+//获取fileEntry
+window.resolveLocalFileSystemURL(url, function (fileEntry) {
+	//读取文件内容
+	showFile(fileEntry)
+});
