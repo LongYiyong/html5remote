@@ -131,13 +131,12 @@ function showEntries(entries) {
 			'4是否是目录：', entry.isDirectory, 
 			// 5.filesystem:当前fs（FileSystem对象）的引用
 			entry.name.includes('.png')?
+			//获取目录路径转换为URL地址，结果如：filesystem:http://localhost:57128/temporary/7.png
 			'<img src="'+entry.toURL()+'"/>':
 			''
 		].join('');
-		//entry.toURL()结果：filesystem:http://localhost:57128/temporary/7.png
     fragment.appendChild(li);
 	});
-	
   document.querySelector('#filelist').appendChild(fragment);
 }
 
@@ -170,7 +169,7 @@ function fileDemo(){
 	let files = document.querySelector('input').file;
 	for (let i = 0; i < files.length; i++) {
 		let file = files[i];
-		// File对象是文件系统中的文件数据对象，用于获取文件的数据，包含四个属性
+		// File对象是文件系统中的文件数据对象，用于获取文件数据，含四属性
 		// size: 文件数据对象的数据大小，单位为字节
 		// type: 文件数据对象MIME类型
 		// name: 文件数据对象的名称，不包括路径
@@ -270,16 +269,13 @@ function errorHandler(err) {
 }
 
 
-
 //显示指定fileEntity中的内容
 function showFile(fileEntity) {
-
   fileEntity.file(function (file) {
 	var reader = new FileReader();
     reader.onloadend = function (e) {
       console.log(reader.result);
 		}
-		console.log(fileEntry.fullPath+'文件名：' + fileEntry.name +'\r\n字节大小：' + file.size)
 		reader.readAsText(file);
 	});
 }
@@ -293,3 +289,36 @@ window.resolveLocalFileSystemURL(url, function (fileEntry) {
 	//读取文件内容
 	showFile(fileEntry)
 });
+
+URLType 
+// 文件路径类型
+// 在文件系统中的文件路径需转换成URL格式，方便runtime快速加载
+
+RelativeURL 
+// 相对路径URL
+// 只能在扩展API中使用，相对于基座提供的特定目录，以“_”开头。
+
+// 常量：
+"_www": 
+// 应用资源目录
+//保存应用的所有html、css、js等资源文件，与文件系统中根目录PRIVATE_WWW一致，后面加相对路径如“_www/res/icon.png”。 注意：应用资源目录是只读目录，只能读取次目录下的文件，不能修改或新建。
+
+"_doc": 
+// 应用私有文档目录
+// 用于保存应用运行期业务逻辑数据，与文件系统中根目录PRIVATE_DOCUMENTS，如“_doc/userdata.xml”。
+
+"_documents": 
+// 程序公用文档目录
+// 用于保存程序中各应用间可共享文件的目录，与文件系统中根目录PUBLIC_DOCUMENTS，如“_document/share.doc”。
+
+"_downloads": 
+// 程序公用下载目录
+// 用于保存程序下载文件的目录，与文件系统中根目录PUBLIC_DOWNLOADS，如“_download/mydoc.doc”
+
+LocalURL 
+// 本地路径URL
+// 可在html页面中直接访问本地资源，以“file:///”开头，后面跟随系统的绝对路径。如：“file:///D:/res/hello.html”。沙盒系统还有以‘filesystem:http://’开头
+
+RemoteURL 
+// 网络路径URL
+// 可在html页面中以网络资源模式访问本地资源，以“http://”开头，后面跟随相对路径。 如示例：“http://localhost:13131/_www/res/icon.png”，其中“_www”字段可支持类型与相对路径URL一致。
