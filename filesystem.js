@@ -321,4 +321,4 @@ LocalURL
 
 RemoteURL 
 // 网络路径URL
-// 可在html页面中以网络资源模式访问本地资源，以“http://”开头，后面跟随相对路径。 如示例：“http://localhost:13131/_www/res/icon.png”，其中“_www”字段可支持类型与相对路径URL一致。
+// 可在html中以网络资源模式访问本地资源，以“http://”开头，后面跟随相对路径。 如：“http://localhost:13131/_www/res/icon.png”，其中“_www”字段可支持类型与相对路径URL一致。
