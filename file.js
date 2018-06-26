@@ -42,3 +42,31 @@ FileWriter
 //
 
 // Blob接口和File接口可以返回数据的字节数等信息，也可以“切割”，但无法获取真正的内容，这也正是FileReader存在的意义，而文件大小不一时，读取文件可能存在明显的时间花费，所以我们用异步的方式，通过触发另外的事件来返回读取到的文件内容
+
+
+
+
+
+
+
+
+//举例一：控制file控件，读取其中的第二个文件，并将其文本内容在控制台输出
+<input id="images" type="file" multiple accept="image/*" />
+// accept属性控制允许上传的文件类型。该属性为一个或多个MIME类型字符串。多个MIME类型字符串之间应以逗号分割。这种文件类型过滤是很脆弱的，如果开发者需要进行文件上传，则必须在服务器端对文件类型进行过滤。
+
+var input = document.querySelector('input[type="file"]');
+var secondFile = input.files[1];
+
+var reader = new FileReader();
+reader.readAsText(secondFile);
+reader.onloadend = function (e) {
+  console.log(reader.result);
+}; 
+
+//举例二：给一个含utf-8编码的文本文件file去掉BOM头信息
+var size = file.size; // 先取得文件总字节数  
+var result = file.slice(3,size-3);//去掉开头3个字节 
+
+
+
+
