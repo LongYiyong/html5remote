@@ -51,7 +51,7 @@ FileWriter
 
 
 //举例一：控制file控件，读取其中的第二个文件，并将其文本内容在控制台输出
-<input id="images" type="file" multiple accept="image/*" />
+<input id="fileBox" type="file" multiple accept="image/*" />
 // accept属性控制允许上传的文件类型。该属性为一个或多个MIME类型字符串。多个MIME类型字符串之间应以逗号分割。这种文件类型过滤是很脆弱的，如果开发者需要进行文件上传，则必须在服务器端对文件类型进行过滤。
 
 var input = document.querySelector('input[type="file"]');
@@ -66,6 +66,92 @@ reader.onloadend = function (e) {
 //举例二：给一个含utf-8编码的文本文件file去掉BOM头信息
 var size = file.size; // 先取得文件总字节数  
 var result = file.slice(3,size-3);//去掉开头3个字节 
+
+
+//默认FileReader会分段读取File对象，这是分段大小不一定，并且一般会很大
+fileBox.onchange = function () {
+  var file = this.files[0];
+  var reader = new FileReader();
+  //var step = 10 * 3 * 8; //固定长度截取 文件内容时注意，在切分点会有乱码出现的可能
+  var step = 1024 * 512; //如果文件太大，截取内容小会出现假死现象，因为js执行是同步的
+  var total = file.size;
+  var cuLoaded = 0;
+  reader.onload = function (e) {//读取一段成功
+    uploadFile(reader.result, cuLoaded, function(){
+      showResult(reader.result);
+      cuLoaded += loaded;
+      if (cuLoaded < total) {
+        //IE 浏览器下，事件触发速度太快，页面容易出现假死现象，解决方案延缓事件触发
+        setTimeout(function () {
+          readBlob(cuLoaded);
+        }, 10);
+        //直接使用在Google，FF没问题
+        // readBlob(cuLoaded);
+      } else {
+        console.log('总共用时：' + (new Date().getTime() - startTime.getTime()) / 1000);
+        cuLoaded = total;
+      }
+    });
+  }
+  reader.onprogress = function (e) {
+    if (e.lengthComputable == false)
+      return;
+    cuLoaded += e.loaded;
+    //更新进度条
+    var value = (_this.loaded / _this.total) * 100;
+  }
+  //处理显示读取结果
+  function showResult(result) {
+    //在读取结果处理中，如果没有Dom显示操作，速度还是非常快的,如果有Dom显示操作在IE下，很容易使浏览器崩溃
+    $('blockquote').append(result);
+
+    // var buf = new Uint8Array(result);ArrayBuffer
+    // $('blockquote').append(buf.toString());
+  }
+  // var reader2 = new FileReader();
+  // function showResult(result) {
+  //   //解决方案 先读取 blob 然后在转换成 字符串
+  //   //如用Uint8Array 则每次读取数量应该是8的倍数
+  //   var buf = new Uint8Array(result);Int32Array
+  //   var blob = new Blob([buf]);
+  //   reader2.readAsText(blob, 'gbk');
+  //   reader2.onload = function (e) {
+  //     $('blockquote').append(reader2.result);
+  //   }
+  // }
+  //开始读取
+  readBlob(0);
+  //指定开始位置，分块读取文件
+  function readBlob(start) {
+    var blob = file.slice(start, start + step);
+    reader.readAsText(blob, 'gbk');
+
+    // reader.readAsArrayBuffer(blob);
+  }
+  //使用Ajax方式上传，文件不能过大，最好小于三四百兆，因为过多的连续Ajax请求会使后台崩溃，获取InputStream中数据会为空，尤其在Google浏览器测试过程中。
+  function uploadFile(result, startIndex, onSuccess) {
+    var blob = new Blob([result]);
+    //提交到服务器
+    var fd = new FormData();
+    fd.append('file', blob);
+    fd.append('filename', file.name);
+    fd.append('loaded', startIndex);
+    var xhr = new XMLHttpRequest();
+    xhr.open('post', '../ashx/upload2.ashx', true);
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState == 4 && xhr.status == 200) {
+        console.info(xhr.responseText);
+        onSuccess();
+      } else if (xhr.status == 500) {
+        //console.info('请求出错，' + xhr.responseText);
+        setTimeout(function () {
+          readBlob(cuLoaded);
+        }, 1000);
+      }
+    }
+    xhr.send(fd);
+  }
+}
 
 
 
