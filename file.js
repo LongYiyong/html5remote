@@ -45,35 +45,23 @@ FileWriter
 
 
 
-
-
-
-
-
-//举例一：控制file控件，读取其中的第二个文件，并将其文本内容在控制台输出
-<input id="fileBox" type="file" multiple accept="image/*" />
-// accept属性控制允许上传的文件类型。该属性为一个或多个MIME类型字符串。多个MIME类型字符串之间应以逗号分割。这种文件类型过滤是很脆弱的，如果开发者需要进行文件上传，则必须在服务器端对文件类型进行过滤。
-
-var input = document.querySelector('input[type="file"]');
-var secondFile = input.files[1];
-
-var reader = new FileReader();
-reader.readAsText(secondFile);
-reader.onloadend = function (e) {
-  console.log(reader.result);
-}; 
-
 //举例二：给一个含utf-8编码的文本文件file去掉BOM头信息
 var size = file.size; // 先取得文件总字节数  
 var result = file.slice(3,size-3);//去掉开头3个字节 
 
 
-//默认FileReader会分段读取File对象，这是分段大小不一定，并且一般会很大
+
+// accept属性控制允许上传的文件类型。该属性为一个或多个MIME类型字符串。多个MIME类型字符串之间应以逗号分割。这种文件类型过滤是很脆弱的，如果开发者需要进行文件上传，则必须在服务器端对文件类型进行过滤。
+<input id="fileBox" type="file" multiple accept="image/*" />
+var fileBox = document.querySelector('input[type="file"]');
 fileBox.onchange = function () {
   var file = this.files[0];
   var reader = new FileReader();
+  // 默认FileReader会分段读取File对象，这是分段大小不一定，且一般会很大
+
   //var step = 10 * 3 * 8; //固定长度截取 文件内容时注意，在切分点会有乱码出现的可能
   var step = 1024 * 512; //如果文件太大，截取内容小会出现假死现象，因为js执行是同步的
+
   var total = file.size;
   var cuLoaded = 0;
   reader.onload = function (e) {//读取一段成功
