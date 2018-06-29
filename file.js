@@ -51,7 +51,7 @@ var result = file.slice(3,size-3);//去掉开头3个字节
 
 
 
-// accept属性控制允许上传的文件类型。该属性为一个或多个MIME类型字符串。多个MIME类型字符串之间应以逗号分割。这种文件类型过滤是很脆弱的，如果开发者需要进行文件上传，则必须在服务器端对文件类型进行过滤。
+// accept属性控制允许上传的文件类型。多个MIME类型字符串之间应以逗号分割。这种文件类型过滤是很脆弱的
 <input id="fileBox" type="file" multiple accept="image/*" />
 var fileBox = document.querySelector('input[type="file"]');
 fileBox.onchange = function () {
@@ -92,21 +92,21 @@ fileBox.onchange = function () {
   function showResult(result) {
     //在读取结果处理中，如果没有Dom显示操作，速度还是非常快的,如果有Dom显示操作在IE下，很容易使浏览器崩溃
     $('blockquote').append(result);
-
     // var buf = new Uint8Array(result);ArrayBuffer
     // $('blockquote').append(buf.toString());
   }
-  // var reader2 = new FileReader();
-  // function showResult(result) {
-  //   //解决方案 先读取 blob 然后在转换成 字符串
-  //   //如用Uint8Array 则每次读取数量应该是8的倍数
-  //   var buf = new Uint8Array(result);Int32Array
-  //   var blob = new Blob([buf]);
-  //   reader2.readAsText(blob, 'gbk');
-  //   reader2.onload = function (e) {
-  //     $('blockquote').append(reader2.result);
-  //   }
-  // }
+
+  var reader2 = new FileReader();
+  function showResult(result) {
+    //解决方案 先读取 blob 然后在转换成 字符串
+    //如用Uint8Array 则每次读取数量应该是8的倍数
+    var buf = new Uint8Array(result);Int32Array
+    var blob = new Blob([buf]);
+    reader2.readAsText(blob, 'gbk');
+    reader2.onload = function (e) {
+      $('blockquote').append(reader2.result);
+    }
+  }
   //开始读取
   readBlob(0);
   //指定开始位置，分块读取文件
