@@ -45,20 +45,19 @@ FileWriter
 
 
 
-//举例二：给一个含utf-8编码的文本文件file去掉BOM头信息
-var size = file.size; // 先取得文件总字节数  
-var result = file.slice(3,size-3);//去掉开头3个字节 
+
 
 
 
 // accept属性控制允许上传的文件类型。多个MIME类型字符串之间应以逗号分割。这种文件类型过滤是很脆弱的
 <input id="fileBox" type="file" multiple accept="image/*" />
 var fileBox = document.querySelector('input[type="file"]');
+
 fileBox.onchange = function () {
   var file = this.files[0];
   var reader = new FileReader();
-  // 默认FileReader会分段读取File对象，这是分段大小不一定，且一般会很大
 
+  // FileReader默认分段读取File对象，这是分段大小不一定，且一般会很大
   //var step = 10 * 3 * 8; //固定长度截取 文件内容时注意，在切分点会有乱码出现的可能
   var step = 1024 * 512; //如果文件太大，截取内容小会出现假死现象，因为js执行是同步的
 
@@ -108,7 +107,8 @@ fileBox.onchange = function () {
     }
   }
   //开始读取
-  readBlob(0);
+  //给一个含utf-8编码的文本文件file去掉3字节BOM头信息
+  readBlob(3);
   //指定开始位置，分块读取文件
   function readBlob(start) {
     var blob = file.slice(start, start + step);
