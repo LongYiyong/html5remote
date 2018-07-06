@@ -31,13 +31,14 @@ function startComputation() {
 	worker.postMessage({'cmd': 'average', 'data': [1, 2, 3, 4]});
 }
 
+
 // worker 
 // 在worker的上下文中，self和this都指向worker的全局作用域
 self.addEventListener('message', function(e) {
   var data = e.data;
   switch (data.cmd) {
 		case 'average':
-			// 由于 Web Workers 的多线程特性，它只能使用一部分 JavaScript 功能
+			// 由于 Web Workers 的多线程特性，只能使用一部分JS功能
 			// navigator 对象
 			// location 对象（只读）
 			// XMLHttpRequest
@@ -45,7 +46,7 @@ self.addEventListener('message', function(e) {
 			// Application Cache
 			// 使用 importScripts 来引用外部脚本
 			// 创建其它 web workers
-			// Web Workers 不能够访问一些非常关键的 JavaScript 功能：
+			// 不能够访问一些非常关键的JS功能：
 			// DOM（非线程安全的）
 			// window / document / parent 对象
       var result = method(data);
