@@ -32,8 +32,7 @@ function startComputation() {
 }
 
 
-// worker 
-// 在worker的上下文中，self和this都指向worker的全局作用域
+// 在worker上下文中，self和this都指向worker的全局作用域
 self.addEventListener('message', function(e) {
   var data = e.data;
   switch (data.cmd) {
