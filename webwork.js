@@ -62,7 +62,9 @@ self.addEventListener('message', function(e) {
 
 
 
-// Broadcast Channel 是更为普遍的通信接口。它允许我们向共享同一个源的所有上下文发送消息。同一个源下的所有的浏览器选项卡，内联框架或者 workers 都可以发送和接收消息：
+// Broadcast Channel是更为普遍的通信接口。
+//它允许我们向共享同一个源的所有上下文发送消息。
+//同一个源下的所有的浏览器选项卡，内联框架或者 workers 都可以发送和接收消息：
 
 // 连接到一个广播信道
 var bc = new BroadcastChannel('test_channel');
