@@ -1,10 +1,9 @@
 var canvas = document.createElement('canvas')
-var ctx = canvas.getContext("2d");
 canvas.width = 500
 document.querySelector('body').append(canvas)
 
-//返回context的canvas元素
-console.log(ctx.canvas)
+var ctx = canvas.getContext("2d");
+console.log(ctx.canvas)//返回context的canvas元素
 
 //文字录入
 ctx.font = "48px serif";
