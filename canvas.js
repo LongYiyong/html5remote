@@ -13,8 +13,10 @@ ctx.strokeText("Hello", 50, 100);
 // ctx.fillStyle = gradient;//CanvasGradient对象 （线性或放射性渐变）
 // ctx.fillStyle = pattern;//CanvasPattern 对象 （可重复图像）
 ctx.fillStyle = "blue";
+
 //重叠模式
 ctx.globalCompositeOperation = "xor";
+
 //填充矩形
 ctx.fillRect(0, 0, 100, 100);
 ctx.fillStyle = "red";
