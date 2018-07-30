@@ -7,13 +7,13 @@ console.log(ctx.canvas)//返回context的canvas元素
 
 //文字录入
 ctx.font = "48px serif";
-ctx.strokeText("Hello world", 50, 100);
+ctx.strokeText("Hello", 50, 100);
 
 //填充样式
 // ctx.fillStyle = gradient;//CanvasGradient对象 （线性或放射性渐变）
 // ctx.fillStyle = pattern;//CanvasPattern 对象 （可重复图像）
 ctx.fillStyle = "blue";
-//
+//重叠模式
 ctx.globalCompositeOperation = "xor";
 //填充矩形
 ctx.fillRect(0, 0, 100, 100);
